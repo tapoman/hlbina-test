@@ -448,12 +448,17 @@
   };
 
   // ------------------------------------------------------------------ nastavenia
-  // pixelPerfect: na CrazyGames predvolene VYPNUTÉ (majiteľ 2026-10-04: „Vyplniť okno"). Ich okno na počítači je
-  // 821×462 až 1216×684 (docs.crazygames.com/requirements/gameplay, čitateľnosť pri DPR 1): celé zväčšenie by tam bolo
-  // 1× a písmo 5–7 px; vyplnenie dá ~1,4–1,9×. Hráč si ostré pixely zapne v Nastaveniach (uloží sa jeho voľba).
+  // pixelPerfect („Ostré pixely" = len celé násobky) je predvolene VYPNUTÉ všade — hra vyplní okno. Najprv len na
+  // CrazyGames (majiteľ 2026-10-04: „Vyplniť okno"; ich rámy 907×510, 1077×606 a 821×462 dávali celým zväčšením 1× a písmo
+  // 5–7 px), od 2026-10-06 všade (tester: „prečo sharp pixels zoomne 10cm dozadu" — hral po anglicky; majiteľ: „Vyplniť
+  // okno všade"). Celé násobky pri vnútornej výške okna 640–959 px dajú 640 px: PC 1920×1080 s oknom Chrome ~925–955 px
+  // (odhad: lišta úloh + karty + adresa) = 67–69 %, notebook so zväčšením 125–150 % ~70 %, telefón 92–100 %, telefón
+  // s výrezom v celej obrazovke až 78 % (ARCHITECTURE §26). Hráč si ostré pixely zapne v Nastaveniach (uloží sa jeho voľba).
+  // Verzia nastavení v (S.SETTINGS_V): v1 = bez poľa, v2 = predvolené vyplnenie. Uložené v1 sa pri NAČÍTANÍ raz prepne na
+  // vyplnenie (S.loadSettings) — ich true bolo takmer vždy len vtedajšie predvolené; voľba uložená od v2 platí.
+  S.SETTINGS_V = 2;
   S.defaultSettings = function () {
-    var cg = !!(HL.platform && HL.platform.name === 'crazygames');
-    return { musicVol: 0.6, sfxVol: 0.8, vibration: true, latencyMs: 0, shake: true, pixelPerfect: !cg, event: 'auto' };
+    return { musicVol: 0.6, sfxVol: 0.8, vibration: true, latencyMs: 0, shake: true, pixelPerfect: false, event: 'auto', v: S.SETTINGS_V };
   };
 
   S.sanitizeSettings = function (o) {
@@ -482,7 +487,11 @@
     if (!storage) return S.defaultSettings();
     try {
       var raw = storage.getItem(S.SETTINGS_KEY);
-      return raw == null ? S.defaultSettings() : S.sanitizeSettings(JSON.parse(raw));
+      if (raw == null) return S.defaultSettings();
+      var o = JSON.parse(raw);
+      // v1 → v2 len tu (pri načítaní), nie v sanitizeSettings: tá beží aj pri každom uložení a zmazala by voľbu hráča.
+      if (isObj(o) && !(o.v >= 2)) o.pixelPerfect = false;
+      return S.sanitizeSettings(o);
     } catch (e) {
       fail('sim.save.settingsLoad', msg(e));
       return S.defaultSettings();

@@ -1,7 +1,8 @@
 // Štart, hlavná slučka, správca scén, zobrazenie a ladiace nástroje.
 //
-// Zobrazenie (dizajn 14.1): logická herná plocha 180×320 na výšku, celočíselne
-// zväčšená (pixely ostanú ostré). Na širokej obrazovke pribudnú bočné panely
+// Zobrazenie (dizajn 14.1): logická herná plocha 180×320 na výšku, predvolene zväčšená na celé okno
+// (majiteľ 2026-10-06: „Vyplniť okno všade"); „Ostré pixely" v Nastaveniach = len celé násobky (každý pixel
+// rovnako veľký, hra môže byť menšia — na PC 1920×1080 o tretinu). Na širokej obrazovke pribudnú bočné panely
 // (dizajn: "na PC s bočnými panelmi") a logické plátno má šírku W = 180 + 2×PANEL.
 // Canvas má rozmery LOGICKÉ; zväčšuje ho CSS s image-rendering: pixelated.
 //
@@ -103,7 +104,8 @@
   function layout() {
     var ww = window.innerWidth, wh = window.innerHeight;
     var ins = safeInsets();
-    var pixelPerfect = !(HL.game && HL.game.settings && HL.game.settings.pixelPerfect === false);
+    // Ostré pixely len na výslovnú voľbu (predvolené = vyplniť okno, sim/save.js defaultSettings).
+    var pixelPerfect = !!(HL.game && HL.game.settings && HL.game.settings.pixelPerfect === true);
     var dpr = window.devicePixelRatio || 1;
     var L = HL.viewLayout(ww, wh, dpr, pixelPerfect, ins, !!Q.nopanels);
     view.panels = L.panels;
@@ -134,7 +136,8 @@
     return { panels: panels, W: W, H: H, fit: HL.viewFit(ww, wh, W, H, dpr, pixelPerfect, inset) };
   };
 
-  // Mierka zobrazenia (dizajn 14.1: "celočíselne zväčšované, pixely ostanú ostré").
+  // Mierka zobrazenia. pixelPerfect („Ostré pixely", dizajn 14.1 „celočíselne zväčšované") = celé násobky;
+  // inak (predvolené od 2026-10-06) zlomková mierka na celú plochu — canvas aj tak kreslí najbližším pixelom.
   // Celé číslo musí platiť v PIXELOCH ZARIADENIA, nie v CSS px: pri 125 % / 175 % škálovaní
   // Windows by 2 CSS px na logický pixel boli 2,5 / 3,5 px displeja a stĺpce by sa striedali
   // 2-3-2-3 (review #39) → mierka = floor(fit · dpr) / dpr. Keď sa nezmestí ani 1 px zariadenia
