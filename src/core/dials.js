@@ -19,7 +19,12 @@
   var allowed = true, fromStore = [];
 
   function storage() {
-    try { var s = window.localStorage; s.getItem(KEY); return s; } catch (e) { return null; }
+    try {
+      var s = window.localStorage; s.getItem(KEY);
+      // Testovací odkaz: vlastné ladenie, nie to z verejného odkazu na tom istom origine (core/platform.js storeNs).
+      var P = HL.platform;
+      return P && P.nsStore ? P.nsStore(s, P.storeNs(window.location && window.location.href)) : s;
+    } catch (e) { return null; }
   }
   function query() {
     if (HL.query) return HL.query;

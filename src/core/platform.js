@@ -181,6 +181,43 @@
     return P.locale ? [P.locale, 'en'] : ['en'];
   };
 
+  // Testovací odkaz (majiteľ 2026-10-06: kamaráti majú začať „s resetnutým progresom"): tapoman.github.io/hlbina-test/
+  // má ten istý origin ako verejný tapoman.github.io/hlbina-hra/ = jeden localStorage — kariéra by prešla z jedného
+  // odkazu na druhý a staršia verzia by novšie uloženie odmietla. Preto vlastný menný priestor kľúčov ('hlbina-test:' +
+  // kľúč) pre http(s) adresu, ktorej PRVÝ priečinok sa začína 'hlbina-test' (hlbina-test2 … = ďalšie kolo od nuly).
+  // Všade inde '' = pôvodné kľúče: file://, server v sieti, hlbina-hra, itch.io (cesta sa mení s každou verziou —
+  // priestor podľa cesty by tam aktualizáciou stratil postup), CrazyGames (SDK.data). To isté pravidlo má nápis pri
+  // štarte v index.html; zhodu aj to, že úložisko prehliadača inde nikto nečíta, stráži tests/unit/store_ns.test.js.
+  P.STORE_NS_RE = /^https?:\/\/[^\/?#]+\/(hlbina-test[^\/?#]*)(?:[\/?#]|$)/i;
+  P.storeNs = function (href) {
+    var m = P.STORE_NS_RE.exec(String(href || ''));
+    return m ? m[1].toLowerCase() + ':' : '';
+  };
+  // Úložisko v mennom priestore: rozhranie localStorage (getItem/setItem/removeItem/key/length) nad kľúčmi ns + kľúč;
+  // key/length vidia len kľúče tohto priestoru. Prázdny ns (alebo žiadne úložisko) = to isté úložisko bez obalu.
+  P.nsStore = function (store, ns) {
+    if (!store || !ns) return store;
+    function own() {
+      var out = [], n = 0;
+      try { n = store.length || 0; } catch (e) { n = 0; }
+      for (var i = 0; i < n; i++) {
+        var k = null;
+        try { k = store.key(i); } catch (e) { k = null; }
+        if (k && k.indexOf(ns) === 0) out.push(k.slice(ns.length));
+      }
+      return out;
+    }
+    var w = {
+      ns: ns,
+      getItem: function (k) { return store.getItem(ns + k); },
+      setItem: function (k, v) { store.setItem(ns + k, v); },
+      removeItem: function (k) { store.removeItem(ns + k); },
+      key: function (i) { var l = own(); return i >= 0 && i < l.length ? l[i] : null; },
+    };
+    Object.defineProperty(w, 'length', { get: function () { return own().length; }, enumerable: true });
+    return w;
+  };
+
   P.init = function (host) {
     if (initPromise) return initPromise;
     host = host || {};

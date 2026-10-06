@@ -42,6 +42,7 @@
 
   // ------------------------------------------------------------------ parametre URL
   var Q = {};
+  var storeNs = ''; // menný priestor uloženia (HL.boot, core/platform.js storeNs) — HL_PROBE().storeNs
   if (HL.isBrowser) {
     location.search.replace(/^\?/, '').split('&').forEach(function (kv) {
       if (!kv) return;
@@ -513,6 +514,10 @@
     // Simulácia nesmie siahnuť na Date/Math.random/localStorage — dodáme jej to zvonku.
     var storage = null;
     try { storage = window.localStorage; storage.getItem('hlbina.probe'); } catch (e) { storage = null; }
+    // Testovací odkaz (…/hlbina-test/) má vlastné uloženie: začína od nuly a verejný odkaz na tom istom origine
+    // nechá na pokoji (core/platform.js storeNs). Inde '' = pôvodné kľúče.
+    storeNs = HL.platform.storeNs(window.location && window.location.href);
+    storage = HL.platform.nsStore(storage, storeNs);
     // Jazyky prehliadača (docs/I18N.md): prvé spustenie vyberie jazyk podľa nich; ?lang= má prednosť.
     var langs = [];
     try { langs = (navigator.languages && navigator.languages.length ? Array.prototype.slice.call(navigator.languages) : [navigator.language]).filter(Boolean); } catch (e) { langs = []; }
@@ -611,6 +616,7 @@
         pwa: window.HL_PWA || null,
         platform: HL.platform ? HL.platform.probe() : null,
         saveBadge: HL.ui && HL.ui.saveProblem ? HL.ui.saveProblem() : null,
+        storeNs: storeNs,
         widgets: HL.w && HL.w.list ? HL.w.list() : null,
         fontMissing: HL.font && HL.font.missing ? HL.font.missing.slice() : [],
         spriteMissing: HL.spr && HL.spr.missing ? HL.spr.missing.slice() : [],

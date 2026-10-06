@@ -49,7 +49,9 @@
       hu: 'Betöltés…', es: 'Cargando…', fr: 'Chargement…' };
     var list = [];
     try { var q = /[?&]lang=([a-z]{2})/i.exec(location.search); if (q) list.push(q[1]); } catch (e) { /* */ }
-    try { var st = JSON.parse(localStorage.getItem('hlbina.settings.v1') || '{}'); if (st && st.lang) list.push(st.lang); } catch (e) { /* */ }
+    // Testovací odkaz má vlastné uloženie — to isté pravidlo ako HL.platform.storeNs (core/platform.js).
+    var ns = /^https?:\/\/[^\/?#]+\/(hlbina-test[^\/?#]*)(?:[\/?#]|$)/i.exec(location.href);
+    try { var st = JSON.parse(localStorage.getItem((ns ? ns[1].toLowerCase() + ':' : '') + 'hlbina.settings.v1') || '{}'); if (st && st.lang) list.push(st.lang); } catch (e) { /* */ }
     list = list.concat(navigator.languages || [navigator.language || '']);
     for (var i = 0; i < list.length; i++) {
       var c = String(list[i] || '').slice(0, 2).toLowerCase();

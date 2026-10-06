@@ -11,4 +11,5 @@ V mobile: otvor odkaz a v prehliadači daj *Pridať na plochu* — hra potom be�
 Ovládanie: A/D alebo myš (háčik do strán), S alebo drž tlačidlo (klesanie), medzerník/klik keď svieti zelená (boj),
 W alebo HORE (úlovok do bezpečia). V mobile: ťahaj prstom, drž prst, ťukaj na ŤUKAJ!.
 
-Postup sa ukladá v prehliadači (na každom zariadení zvlášť).
+Postup sa ukladá v prehliadači (na každom zariadení zvlášť). Testovacia verzia má vlastné uloženie, oddelené
+od verejnej hry na tapoman.github.io/hlbina-hra — každý tu začína od nuly a hra tam ostane, ako bola.
