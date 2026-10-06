@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#181425">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Hlbina — pixelová rybárska hra: spusti háčik do hlbiny, ulov čo najviac a vráť sa skôr, než praskne vlasec.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hlbina">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<title>Hlbina</title>
+<style>
+  /* Bezpečné okraje (výrez, domovská lišta): layout() v core/main.js ich číta cez #safe. */
+  :root { --sat: env(safe-area-inset-top, 0px); --sar: env(safe-area-inset-right, 0px);
+          --sab: env(safe-area-inset-bottom, 0px); --sal: env(safe-area-inset-left, 0px); }
+  /* user-select vo všetkých tvaroch (požiadavka CrazyGames: -webkit-/-moz-/-ms-) — výber textu dlhým ťuknutím. */
+  html, body { margin: 0; height: 100%; background: #181425; overflow: hidden; touch-action: none;
+               overscroll-behavior: none; -webkit-touch-callout: none;
+               -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+               -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+  body { display: flex; align-items: center; justify-content: center; }
+  #game { image-rendering: pixelated; image-rendering: crisp-edges; display: block; touch-action: none;
+          -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+          -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; outline: none; }
+  #safe { position: fixed; left: 0; top: 0; width: 0; height: 0; visibility: hidden; pointer-events: none;
+          padding: var(--sat) var(--sar) var(--sab) var(--sal); }
+  /* Rada "Otoč telefón na výšku" v bočných okrajoch (core/main.js); hru nezakrýva a dotyky prepúšťa. */
+  .rot { position: absolute; display: none; image-rendering: pixelated; image-rendering: crisp-edges; pointer-events: none; }
+  #boot { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+          color: #2ce8f5; font: 16px monospace; }
+  #boot.err { color: #ff0044; white-space: pre-wrap; padding: 24px; align-items: flex-start; }
+</style>
+</head>
+<body>
+<canvas id="game" width="180" height="320" tabindex="0"></canvas>
+<div id="safe" aria-hidden="true"></div>
+<div id="boot">Načítavam…</div>
+<script>
+  // Nápis pri štarte v jazyku hráča (hra sa ešte nenačítala, HL.i18n nie je): ?lang= → uložená voľba →
+  // jazyk prehliadača. Na CrazyGames je uloženie v SDK.data (ešte nedostupné) — tam platí prehliadač.
+  (function () {
+    var W = { sk: 'Načítavam…', cs: 'Načítám…', en: 'Loading…', de: 'Wird geladen…', pl: 'Wczytywanie…',
+      hu: 'Betöltés…', es: 'Cargando…', fr: 'Chargement…' };
+    var list = [];
+    try { var q = /[?&]lang=([a-z]{2})/i.exec(location.search); if (q) list.push(q[1]); } catch (e) { /* */ }
+    try { var st = JSON.parse(localStorage.getItem('hlbina.settings.v1') || '{}'); if (st && st.lang) list.push(st.lang); } catch (e) { /* */ }
+    list = list.concat(navigator.languages || [navigator.language || '']);
+    for (var i = 0; i < list.length; i++) {
+      var c = String(list[i] || '').slice(0, 2).toLowerCase();
+      if (W[c]) { document.getElementById('boot').textContent = W[c]; return; }
+    }
+  })();
+</script>
+<script src="src/files.js"></script>
+<script>
+  // Súbory sa pripájajú podľa src/files.js (jediný zoznam pre prehliadač aj testy).
+  // Klasické <script> s async=false: zachovajú poradie a fungujú aj z file:// (dvojklik).
+  // Chyba syntaxe v niektorom súbore NEvyvolá onerror <script> (to je len pre sieť),
+  // súbor sa "načíta" a hra by padla neskôr s nezrozumiteľnou hláškou. Zbierame ich.
+  window.__bootErrors = [];
+  window.addEventListener('error', function (e) {
+    window.__bootErrors.push((e.filename || '').split('/').slice(-2).join('/') + ':' + e.lineno + ' ' + e.message);
+  });
+  // Service worker (sw.js = hra bez siete) sa registruje LEN na http(s) — nikdy z file:// (dvojklik)
+  // a nikdy s ?nosave / ?manual (harness musí byť deterministický, bez cache z minulého behu).
+  // Cez http na adrese v sieti prehliadač SW nepovolí (nie je to bezpečný kontext) — hra aj tak beží.
+  // Stav pre harness: window.HL_PWA.sw ('skipped:file' | 'skipped:harness' | 'skipped:insecure' |
+  // 'unsupported' | 'registering' | 'registered' | 'error'). dist/Hlbina.html tento skript nemá.
+  function registerSW() {
+    var st;
+    if (!/^https?:$/.test(location.protocol)) st = 'skipped:' + location.protocol.replace(':', '');
+    else if (/[?&](nosave|manual)(=|&|$)/.test(location.search)) st = 'skipped:harness';
+    else if (window.isSecureContext === false) st = 'skipped:insecure';
+    else if (!('serviceWorker' in navigator)) st = 'unsupported';
+    else st = 'registering';
+    var pwa = window.HL_PWA = { sw: st, error: null, scope: null };
+    if (st !== 'registering') return;
+    try {
+      // Nový sw.js prevzal stránku (nasadená nová verzia hry) → raz obnoviť, nech beží nový kód hneď.
+      // Pri úplne prvej návšteve (žiadny predchádzajúci SW) sa neobnovuje.
+      var hadController = !!navigator.serviceWorker.controller, reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (!hadController || reloaded) return;
+        reloaded = true; pwa.reloadedForUpdate = true;
+        location.reload();
+      });
+      navigator.serviceWorker.register('sw.js').then(function (reg) { pwa.sw = 'registered'; pwa.scope = reg.scope; },
+        function (e) { pwa.sw = 'error'; pwa.error = String((e && e.message) || e); });
+    } catch (e) { pwa.sw = 'error'; pwa.error = String((e && e.message) || e); }
+  }
+  (function () {
+    var groups = ['core', 'data', 'sim', 'gfx', 'audio', 'ui'];
+    var list = [];
+    groups.forEach(function (g) { (HL_FILES[g] || []).forEach(function (f) { if (list.indexOf(f) < 0) list.push(f); }); });
+    var left = list.length, failed = [];
+    function done() {
+      var boot = document.getElementById('boot');
+      if (failed.length || window.__bootErrors.length) {
+        boot.className = 'err';
+        boot.textContent = (failed.length ? 'Nepodarilo sa načítať:\n' + failed.join('\n') + '\n\n' : '') +
+          (window.__bootErrors.length ? 'Chyby v kóde:\n' + window.__bootErrors.join('\n') : '');
+        return;
+      }
+      function fatal(e) { boot.className = 'err'; boot.textContent = 'Chyba pri štarte:\n' + (e && e.stack || e); console.error(e); }
+      // HL.boot je synchrónny (web); vráti Promise len keď stránka má CrazyGames SDK (core/platform.js čaká na init).
+      var r;
+      try { r = HL.boot(); } catch (e) { fatal(e); return; }
+      if (r && typeof r.then === 'function') { r.then(function () { boot.remove(); registerSW(); }, fatal); return; }
+      boot.remove();
+      registerSW();
+    }
+    list.forEach(function (f) {
+      var s = document.createElement('script');
+      s.src = 'src/' + f;
+      s.async = false;
+      s.onload = function () { if (--left === 0) done(); };
+      s.onerror = function () { failed.push(f); if (--left === 0) done(); };
+      document.body.appendChild(s);
+    });
+  })();
+</script>
+</body>
+</html>

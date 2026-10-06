@@ -1,0 +1,203 @@
+// Français — écran de bâtiment (ui/building.js). Clés ui.building.* — glossaire en tête de fr/data.js.
+// Largeurs : contenu 164 px (paragraphes à la ligne), colonnes de boutique : nom 100 px, propriétés 96 px,
+// boutons Acheter/Équiper 46 px, appâts ×1/×10 24/29 px ; en-tête (nom du bâtiment) 104 px ; toast 150 px/ligne.
+// Genre des bâtiments : Cabane f., Marché m., Atelier m., Boutique d’appâts f., Station météo f., Phare m.,
+// Taverne f., Aquarium m., Chantier naval m., Laboratoire m. — d’où une phrase par bâtiment (built/notBuilt.<id>).
+// « passe au niveau » n’accorde pas.
+(function (HL) {
+  HL.i18n.add('fr', 'building', {
+    // --- toasts après construction et amélioration, sous-titre d’un bâtiment non construit
+    'ui.building.built.chatrc': '{name} construite !',
+    'ui.building.built.trhovisko': '{name} construit !',
+    'ui.building.built.dielna': '{name} construit !',
+    'ui.building.built.navnadaren': '{name} construite !',
+    'ui.building.built.meteostanica': '{name} construite !',
+    'ui.building.built.majak': '{name} construit !',
+    'ui.building.built.krcma': '{name} construite !',
+    'ui.building.built.akvarium': '{name} construit !',
+    'ui.building.built.lodenica': '{name} construit !',
+    'ui.building.built.laboratorium': '{name} construit !',
+    'ui.building.upgraded.chatrc': '{name} passe au niveau {level}',
+    'ui.building.upgraded.trhovisko': '{name} passe au niveau {level}',
+    'ui.building.upgraded.dielna': '{name} passe au niveau {level}',
+    'ui.building.upgraded.navnadaren': '{name} passe au niveau {level}',
+    'ui.building.upgraded.meteostanica': '{name} passe au niveau {level}',
+    'ui.building.upgraded.majak': '{name} passe au niveau {level}',
+    'ui.building.upgraded.krcma': '{name} passe au niveau {level}',
+    'ui.building.upgraded.akvarium': '{name} passe au niveau {level}',
+    'ui.building.upgraded.lodenica': '{name} passe au niveau {level}',
+    'ui.building.upgraded.laboratorium': '{name} passe au niveau {level}',
+    'ui.building.notBuilt.chatrc': 'Non construite',
+    'ui.building.notBuilt.trhovisko': 'Non construit',
+    'ui.building.notBuilt.dielna': 'Non construit',
+    'ui.building.notBuilt.navnadaren': 'Non construite',
+    'ui.building.notBuilt.meteostanica': 'Non construite',
+    'ui.building.notBuilt.majak': 'Non construit',
+    'ui.building.notBuilt.krcma': 'Non construite',
+    'ui.building.notBuilt.akvarium': 'Non construit',
+    'ui.building.notBuilt.lodenica': 'Non construit',
+    'ui.building.notBuilt.laboratorium': 'Non construit',
+    'ui.building.levelOf': 'Niveau {level} sur 3',
+    'ui.building.cantNow': 'Impossible pour l’instant',
+    // « Actuel : <ce que fait le bâtiment à ce niveau> » (texte du niveau dans les données)
+    'ui.building.now': 'Actuel : {what}',
+
+    // --- carte du niveau suivant
+    'ui.building.card.allBuilt': 'Tout est construit',
+    'ui.building.card.build': 'Construire',
+    'ui.building.card.upgrade': 'Améliorer',
+    'ui.building.card.building': 'Construction',
+    'ui.building.card.level': 'Niveau {level}',
+    'ui.building.card.short': 'Il manque {money}',
+
+    // --- boutique (Atelier, Boutique d’appâts, Taverne) et toasts d’achat
+    'ui.building.shop.buy': 'Acheter',
+    'ui.building.shop.equip': 'Équiper',
+    'ui.building.shop.equipped': 'Équipé',
+    'ui.building.shop.bought': 'Acheté et équipé : {name}',
+    'ui.building.shop.equippedToast': 'Équipé : {name}',
+    'ui.building.shop.buyFailed': 'Achat impossible',
+    'ui.building.shop.harpoonBought': 'Harpon acheté ({have} / {max})',
+    'ui.building.shop.baitBought': 'Acheté : {qty}× {name}',
+
+    // --- sommeil (Cabane) ; {day} = « Jour 3 », {time} = « 06:00 »
+    // boutons avec l’icône lune (qui dit « dormir ») : 64 px de texte au plus
+    'ui.building.sleep.toMorning': 'Jusqu’au matin',
+    'ui.building.sleep.toNight': 'Jusqu’à la nuit',
+    'ui.building.sleep.sleeping': 'Tu dors…',
+    'ui.building.sleep.fixHut': 'Répare d’abord la Cabane',
+    'ui.building.sleep.cant': 'Impossible de dormir',
+    'ui.building.sleep.morning': '{day}, {time} — bonjour !',
+    'ui.building.sleep.night': '{day}, {time} — la nuit tombe.',
+    'ui.building.sleep.income': 'Les touristes de l’Aquarium ont laissé {money}',
+    'ui.building.sleep.prize': 'Concours de pêche : tu gagnes {money}',
+
+    // --- Cabane
+    'ui.building.chatrc.needHut': 'Tu pourras dormir une fois la Cabane réparée (niveau 1).',
+    'ui.building.chatrc.sleepInfo': 'Dormir fait avancer le temps : le matin, c’est 06:00, la nuit 21:00. La météo, le marché et la lune suivent.',
+    'ui.building.chatrc.storage': 'Stockage des poissons',
+    'ui.building.chatrc.empty': 'Vide. La prise est rangée ici au retour de la mer — ce qui ne tient pas est vendu aussitôt.',
+    'ui.building.chatrc.sell': 'Vendre au Marché',
+    'ui.building.chatrc.home': 'Foyer douillet',
+    'ui.building.chatrc.homeDone': 'Des fleurs aux fenêtres, de la fumée à la cheminée et une lumière chaude la nuit. On n’est bien que chez soi.',
+    'ui.building.chatrc.homeLater': 'Au niveau 3, la cabane deviendra un foyer douillet — juste pour le plaisir, sans effet sur la pêche.',
+
+    // --- Atelier ; {kg} = charge, {depth} = longueur de ligne, {pct} = « +12 % », {ms} = fenêtre en ms
+    'ui.building.dielna.closed': 'L’Atelier est fermé. Construis-le pour pouvoir acheter du matériel.',
+    'ui.building.dielna.lines': 'Lignes',
+    'ui.building.dielna.linesCols': 'charge · profondeur',
+    'ui.building.dielna.lineStats': '{kg} · jusqu’à {depth}',
+    'ui.building.dielna.lineStatsNoLimit': '{kg} · sans limite',
+    'ui.building.dielna.rods': 'Cannes',
+    'ui.building.dielna.rodsCols': 'progrès · fenêtre',
+    'ui.building.dielna.rodStats': '+{pct} progrès · +{ms} ms',
+    'ui.building.dielna.rodBasic': 'canne de base',
+    'ui.building.dielna.hooks': 'Hameçons',
+    'ui.building.dielna.hooksCols': 'fuite du poisson',
+    'ui.building.dielna.hookStats': 'fuite {pct} plus lente',
+    'ui.building.dielna.hookBasic': 'hameçon de base',
+    'ui.building.dielna.harpoons': 'Harpons',
+    'ui.building.dielna.harpoonStats': 'fait fuir le requin · tu en as {have} / {max}',
+    'ui.building.dielna.note': 'Le matériel acheté est équipé aussitôt. Tu peux rééquiper l’ancien à tout moment.',
+
+    // --- Boutique d’appâts ; {desc} = description de l’appât (initiale en minuscule)
+    'ui.building.navnadaren.baits': 'Appâts',
+    'ui.building.navnadaren.baitsCols': 'stock · prix',
+    'ui.building.navnadaren.worm': 'Gratuit · {desc}',
+    'ui.building.navnadaren.lures': 'Attire : {desc}',
+    'ui.building.navnadaren.stock': 'Tu as {have} · {price} / pièce',
+    'ui.building.navnadaren.buy1': '×1',
+    'ui.building.navnadaren.buy10': '×10',
+    'ui.building.navnadaren.carry': {
+      one: 'Par plongée, tu emportes au plus {n} appât. Ce que tu n’utilises pas retourne au stock.',
+      other: 'Par plongée, tu emportes au plus {n} appâts. Ce que tu n’utilises pas retourne au stock.',
+    },
+    'ui.building.navnadaren.closed': 'La Boutique d’appâts n’est encore qu’un cabanon vide. Construis-la et elle vendra des coquillages.',
+
+    // --- Station météo ; {h} = heures de prévision, {period} = moment de la journée, {time} = heure
+    'ui.building.meteostanica.skyNow': 'Le ciel en ce moment',
+    'ui.building.meteostanica.periodTime': '{period}, {time}',
+    'ui.building.meteostanica.noMeteo': 'Sans instruments, tu ne vois que ce qui est au-dessus de ta tête. Construis la Station météo pour voir 6 heures à l’avance.',
+    'ui.building.meteostanica.forecast': 'Prévisions sur {h} h',
+    'ui.building.meteostanica.now': 'maintenant',
+    'ui.building.meteostanica.plusHours': '+{h} h',
+    'ui.building.meteostanica.intro': 'Pendant ton apprentissage (premières plongées), la mer est calme et ensoleillée. Les prévisions comptent ensuite.',
+    'ui.building.meteostanica.moon': 'Lune',
+    'ui.building.meteostanica.today': 'Aujourd’hui',
+    'ui.building.meteostanica.tomorrow': 'Demain',
+    'ui.building.meteostanica.dayAfter': 'Après-demain',
+    'ui.building.meteostanica.moonHint': 'À la pleine lune et à la nouvelle lune apparaissent des poissons qu’on ne voit pas autrement.',
+    'ui.building.meteostanica.noMoon': 'La Station météo niveau 3 montre les phases de la lune sur 3 jours.',
+
+    // --- Phare ; {line} = nom de la ligne (minuscule), {night}/{midnight} = px de lumière en plus
+    'ui.building.majak.reach': 'Jusqu’où tu peux aller',
+    'ui.building.majak.deepest': 'Au plus bas :',
+    'ui.building.majak.lineLimit': 'La limite, c’est la longueur de ta ligne ({line}).',
+    'ui.building.majak.lineLimitLonger': 'La limite, c’est la longueur de ta ligne ({line}). L’Atelier en vend de plus longues.',
+    'ui.building.majak.abyssGate': 'Sous 1 500 m (Abîme), il faut le Phare niveau 3.',
+    'ui.building.majak.floor': 'Plus bas, il n’y a que le fond de la mer.',
+    'ui.building.majak.light': 'Lumière de l’hameçon en plus : nuit +{night} px, Minuit +{midnight} px.',
+    'ui.building.majak.levels': 'Niveaux du phare',
+    'ui.building.majak.detail.1': 'La nuit, tu vois plus loin autour de l’hameçon.',
+    'ui.building.majak.detail.2': 'De la lumière même à Minuit (600 – 1 500 m).',
+    'ui.building.majak.detail.3': 'L’Abîme sous 1 500 m et la Profondeur infinie.',
+    'ui.building.majak.endless': 'Profondeur infinie : une longue plongée avec un matériel fixe. Jusqu’où iras-tu ?',
+    'ui.building.majak.endlessButton': 'Profondeur infinie',
+
+    // --- Taverne ; {tip} = conseil des pêcheurs (données), {money} = récompense, {done}/{have} = nombres
+    'ui.building.krcma.closed': 'Fenêtres condamnées et poussière. Une fois la taverne réparée, les pêcheurs te raconteront ce qu’ils savent.',
+    'ui.building.krcma.talk': 'Les pêcheurs racontent',
+    'ui.building.krcma.quote': '« {tip} »',
+    'ui.building.krcma.questsLater': 'Au niveau 2, les pêcheurs te confieront des quêtes récompensées.',
+    'ui.building.krcma.quests': 'Quêtes',
+    'ui.building.krcma.questsDone': 'réussies : {done}',
+    'ui.building.krcma.reward': 'Récompense {money}',
+    'ui.building.krcma.rewardGold': 'Récompense {money} + appât doré',
+    'ui.building.krcma.cluesLater': 'Au niveau 3, ils livrent des indices sur les légendes et vendent l’appât doré.',
+    'ui.building.krcma.clues': 'Indices sur les légendes',
+    'ui.building.krcma.gold': 'Appât doré',
+    'ui.building.krcma.goldHave': 'tu en as {have}',
+    'ui.building.krcma.goldDesc': '{desc}. Un par jour.',
+    'ui.building.krcma.goldBought': 'L’appât doré est à toi',
+    'ui.building.krcma.cantBuyNow': 'Pas en vente pour l’instant',
+
+    // --- Aquarium ; {income}/{perSpecies}/{perTrophy} = sommes en €, {count}/{got}/{total} = nombres
+    'ui.building.akvarium.closed': 'Un chantier. Construis l’aquarium et exposes-y tes prises.',
+    'ui.building.akvarium.tank': 'Bassin',
+    'ui.building.akvarium.species': 'espèces : {count}',
+    'ui.building.akvarium.income': 'Les touristes rapportent {income} par jour ({perSpecies} par espèce exposée). Ils paient à chaque nouveau jour.',
+    'ui.building.akvarium.incomeTrophy': 'Les touristes rapportent {income} par jour ({perSpecies} par espèce exposée, {perTrophy} par trophée). Ils paient à chaque nouveau jour.',
+    'ui.building.akvarium.incomeLater': 'Au niveau 2, des touristes viendront payer pour chaque espèce exposée.',
+    'ui.building.akvarium.trophiesLater': 'Au niveau 3, tu exposeras ici les trophées des légendes.',
+    'ui.building.akvarium.trophies': 'Trophées des légendes',
+    'ui.building.akvarium.trophyCount': '{got} sur {total}',
+    'ui.building.akvarium.empty': 'Encore vide. Attrape quelque chose !',
+
+    // --- Marché
+    'ui.building.trhovisko.info': 'Au Marché, tu vends les poissons de la Cabane. Chaque pièce vendue fait baisser la demande pour son espèce — essaie d’autres profondeurs et d’autres heures.',
+    'ui.building.trhovisko.open': 'Ouvrir le marché',
+
+    // --- Chantier naval et Laboratoire (Vieille centrale, lac nucléaire — docs/JAZERO.md) ; {line} = nom de la
+    // ligne (minuscule), {level} = niveau du Chantier naval ; bouton SUR LE LAC 140 px
+    'ui.building.lodenica.closed': 'Une barque retournée. Sans chantier naval, tu n’iras pas sur le lac nucléaire.',
+    'ui.building.lodenica.lake': 'Lac nucléaire',
+    'ui.building.lodenica.deepest': 'Au plus bas dans le lac',
+    'ui.building.lodenica.noLine': 'Sans ligne du Laboratoire, impossible d’aller sur le lac.',
+    'ui.building.lodenica.shipyardLimit': 'Plus bas, il faut le Chantier naval niveau {level}.',
+    'ui.building.lodenica.lineLimit': 'Ta {line} ne descend pas plus bas.',
+    'ui.building.lodenica.floor': 'Jusqu’au cœur du réacteur. Le lac ne va pas plus bas.',
+    'ui.building.lodenica.zones': 'Zones du lac',
+    'ui.building.lodenica.info': 'Mutants, fûts et méduses : mêmes règles qu’en mer. Ni requins ni pieuvres ici.',
+    'ui.building.lodenica.go': 'SUR LE LAC',
+    'ui.building.laboratorium.closed': 'Un conteneur verrouillé. Le Laboratoire fabrique des lignes et des cannes qui résistent à l’eau du lac.',
+    'ui.building.laboratorium.lines': 'Lignes pour le lac',
+    'ui.building.laboratorium.rods': 'Cannes pour le lac',
+    'ui.building.laboratorium.note': 'Hameçons et appâts sont les mêmes qu’en mer. En mer, tu pêches avec ta ligne et ta canne de mer.',
+
+    // --- panneaux latéraux (PC)
+    'ui.building.panel.levels': 'Tous les niveaux',
+    'ui.building.panel.village': 'Village',
+    'ui.building.panel.plant': 'Vieille centrale',
+    'ui.building.panel.storage': 'Stockage',
+  });
+})(globalThis.HL);

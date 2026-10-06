@@ -1,0 +1,187 @@
+// Deutsch — Szene TAUCHGANG (ui/dive.js) samt Karte an der Oberfläche und Seitenleisten. Quelle: sk/dive.js.
+// Breiten (logische px; normal ≈ 5 px/Zeichen, klein ≈ 4 px): Knopf HOCH und Kampfknopf 64 px, HARPUNE 66 px,
+// Banner 168 px in doppelter Größe (längere werden verkleinert), Kartenzeile 156 px (bricht um),
+// Seitenleisten ~94 px, Spannungs-Etikett unter dem Bogen 62 px. − ist U+2212, – U+2013, — U+2014, … U+2026.
+(function (HL) {
+  HL.i18n.add('de', 'dive', {
+    // --- untere Leiste, obere Leiste, Kampfknopf
+    'ui.dive.up': 'HOCH',
+    'ui.dive.catchLabel': 'Fang',
+    'ui.dive.fishCount': { one: '{n} Fisch', other: '{n} Fische' },
+    'ui.dive.count': '×{count}',
+    'ui.dive.baitMixShort': 'Mix',
+    'ui.dive.mult': '×{v}',
+    'ui.dive.loadKg': '{total} / {strength} kg',
+    'ui.dive.pad.tap': 'TIPPEN!',
+    'ui.dive.pad.wait': 'WARTEN',
+    'ui.dive.harpoon': 'HARPUNE',
+    'ui.dive.haulHint': 'Bonus ab {next}',              // Bonus für großen Fang: Leiste statt „Fang", ≤ 54 px klein
+
+    // --- Banner und Texte am Haken
+    'ui.dive.banner.caught': 'GEFANGEN!',
+    'ui.dive.banner.legendCaught': 'LEGENDE!',
+    'ui.dive.banner.legend': 'LEGENDE',
+    'ui.dive.banner.bossPhase': 'PHASE {phase}/3',
+    'ui.dive.banner.bossPhaseSub': '{name} ändert den Rhythmus',
+    'ui.dive.banner.knot': 'RETTUNGSKNOTEN',
+    'ui.dive.banner.knotSub': 'Die Schnur hielt, verloren: {fish}',
+    'ui.dive.banner.haulLost': 'FANG VERLOREN',
+    'ui.dive.banner.haulLostSub': 'Der Fisch ist entkommen und hat {fish} mitgenommen',
+    'ui.dive.banner.safe': 'GESICHERT',          // Kopf der Karte 2× + Wert: „IN SICHERHEIT“ überlappte ihn
+    'ui.dive.banner.up': 'OBEN',                // Kopf der Karte 2× + „kein Fang“ rechts (AUFGETAUCHT überlappte)
+    'ui.dive.banner.safeSub': 'Fang {money} · {fish}',
+    'ui.dive.banner.noCatch': 'Kein Fang',
+    'ui.dive.banner.zoneSub': '{from}–{to} · {desc}',
+    'ui.dive.banner.zoneSubOpen': 'ab {from} · {desc}',
+    'ui.dive.fx.fightsBack': 'Wehrt sich! −{pct}',
+    'ui.dive.fx.escaped': 'Entkommen!',
+    'ui.dive.fx.legendLeft': '{name} schwamm davon',
+    'ui.dive.fx.legendUnknown': 'Legende',
+    'ui.dive.fx.jelly': 'Qualle!',
+    'ui.dive.fx.rockBlocked': 'Fels',
+    'ui.dive.fx.rock': 'Fels! −{pct}',
+    'ui.dive.fx.barrelBlocked': 'Fass',          // Atomsee: das Hindernis ist ein rostiges Fass, kein Fels
+    'ui.dive.fx.barrel': 'Fass! −{pct}',
+    'ui.dive.fx.sharkAte': 'Hai fraß: {name}',
+    'ui.dive.fx.harpoonHit': 'Treffer!',
+    'ui.dive.fx.baitOut': 'Köder alle!',
+    'ui.dive.fx.upBlocked': 'Im Kampf nicht nach oben',
+    'ui.dive.fx.lineEnd': 'Schnurende: {depth}',
+    'ui.dive.fx.weather': 'Wetter: {weather}',
+
+    // --- Zeichen über der Welt (Hai, Krake, Aal)
+    'ui.dive.shark': 'HAI',
+    'ui.dive.octopus.title': 'KRAKE!',
+    'ui.dive.octopus.warn': 'packt in {sec} s zu · HOCH = fliehen',
+    'ui.dive.octopus.shake': 'ABSCHÜTTELN!',
+    'ui.dive.eel.move': 'BEWEG DICH!',
+
+    // --- Kampf-Panel
+    'ui.dive.fight.rhythm': 'Rhythmus: {name}',
+    'ui.dive.fight.rhythmBoss': 'Takt: {name} · Phase {phase}/{of}',   // 118 px klein
+    'ui.dive.fight.rhythmUnknown': 'unbekannt',
+    'ui.dive.fight.pull': 'ZIEHT',
+    'ui.dive.fight.slack': 'LOCKER',
+    'ui.dive.fight.hooked': 'Anhieb',
+    'ui.dive.fight.risk': 'Nach Anhieb bis {after} / {strength} kg',
+    'ui.dive.fight.riskSnap': 'Nach Anhieb bis {after} / {strength} kg — reißt!',
+
+    // --- Riss, Verbesserung (Endlose Tiefe), Pause
+    'ui.dive.snap.title': 'GERISSEN!',
+    'ui.dive.snap.eel': 'Schattenaal biss die Schnur durch',   // 172 px
+    'ui.dive.snap.tension': 'Zu viel Spannung auf der Schnur',
+    'ui.dive.snap.nothing': 'An der Schnur hing nichts',
+    'ui.dive.lost': 'Verloren: {what}',
+    'ui.dive.perk.title': 'VERBESSERUNG',
+    'ui.dive.perk.sub': 'Tiefe {depth} · wähle eins (1, 2, 3)',
+    'ui.dive.pause.title': 'PAUSE',
+    'ui.dive.pause.resume': 'Weiter',
+    'ui.dive.pause.soundOn': 'Ton: an',
+    'ui.dive.pause.soundOff': 'Ton: aus',
+    'ui.dive.pause.surface': 'Auftauchen (HOCH)',
+    'ui.dive.pause.hint': 'Esc oder P = weiter',
+    'ui.dive.pause.noSurface': 'Im Kampf kein Auftauchen',
+
+    // --- linke Seitenleiste (Tauchgang und Oberfläche): Tiefe und Steuerung. Tastennamen stehen im Code.
+    'ui.dive.side.depth': 'TIEFE',
+    'ui.dive.side.line': 'Schnur: {depth}',
+    'ui.dive.side.lineEndless': 'Schnur: endlos',
+    'ui.dive.side.deepest': 'Tiefster Punkt: {depth}',   // DIESER Tauchgang („Rekord“ klang nach Karriere); 85/96 px bei 3.000 m
+    'ui.dive.help.title': 'Steuerung',
+    'ui.dive.help.moveKeys': 'A/D, Maus',
+    'ui.dive.help.move': 'seitwärts',
+    'ui.dive.help.sinkKeys': 'S, li. Taste',
+    'ui.dive.help.sink': 'sinken',
+    'ui.dive.help.tapKeys': 'Leertaste',
+    'ui.dive.help.tap': 'Kampf',
+    'ui.dive.help.up': 'HOCH',
+    'ui.dive.help.harpoon': 'Harpune',
+    'ui.dive.help.pause': 'Pause',
+    'ui.dive.help.again': 'wieder runter',
+    'ui.dive.help.dive': 'abtauchen',
+    'ui.dive.help.bait': 'Köder',
+    'ui.dive.help.harbour': 'Hafen',
+    'ui.dive.help.shore': 'Ufer',                  // Atomsee: zurück ans Ufer beim Alten Kraftwerk
+
+    // --- rechte Seitenleiste: Fang, Spannung, Vorhersage, Zone, Köder
+    'ui.dive.side.catch': 'FANG',
+    'ui.dive.side.lost': 'VERLOREN',
+    'ui.dive.side.nothingYet': 'Noch nichts',
+    'ui.dive.side.more': '+ weitere: {count}',
+    'ui.dive.side.total': 'Gesamt',
+    'ui.dive.side.tension': 'SPANNUNG',
+    'ui.dive.side.depthMult': 'Tiefe {mult}',
+    'ui.dive.part.fish': 'Fischgewicht',          // Anteil der Spannung, 66 px klein
+    'ui.dive.part.fight': 'Zug des Fisches',
+    'ui.dive.part.spikes': 'Fehltipps',
+    'ui.dive.part.jelly': 'Qualle',
+    'ui.dive.part.octopus': 'Krake',
+    'ui.dive.part.hazard': 'Sturm',
+    'ui.dive.forecast.title': 'Vorhersage',
+    'ui.dive.forecast.now': 'jetzt',
+    'ui.dive.forecast.from': 'ab {time}',
+    'ui.dive.zone.title': 'IN DER ZONE',
+    'ui.dive.zone.bait': 'Köder',
+    'ui.dive.zone.ideal': 'ideal',
+    'ui.dive.zone.ok': 'beißt',
+    'ui.dive.zone.no': 'nein',
+    'ui.dive.zone.bites': 'Beißen auf: {baits}',
+    'ui.dive.zone.legend': 'Legende: {name}',
+    'ui.dive.zone.hazards': 'Gefahren',
+    'ui.dive.side.baitMix': 'Ködermix',
+    'ui.dive.side.baitLeft': 'noch {count}',
+    'ui.dive.side.baitUnlimited': 'unbegrenzt',
+    'ui.dive.side.harpoons': 'Harpunen: {count}',
+    'ui.dive.side.lineKg': 'Schnur: {kg}',
+    'ui.dive.side.lineKgDamaged': 'Schnur: {kg}, beschädigt',
+    'ui.dive.side.shed': 'Hütte',
+
+    // --- Karte an der Oberfläche (Zeile 156 px, bricht um; Zahl und Einheit bleiben zusammen)
+    'ui.dive.card.again': 'WIEDER ABTAUCHEN',
+    'ui.dive.card.harbour': 'HAFEN',
+    'ui.dive.card.shore': 'UFER',                  // Atomsee: Knopf 52 px, zurück zum Alten Kraftwerk
+    // Deutsche Ködernamen sind Komposita („Leuchtköder“) — es gibt kein Wort, das man abschneiden könnte.
+    'ui.dive.card.baitNoun': '',
+    'ui.dive.card.bait': 'Köder: {name}',
+    'ui.dive.card.baitCount': 'Köder: {name} ×{count}',
+    'ui.dive.card.noCatch': 'kein Fang',
+    'ui.dive.card.causeEel': 'Der Schattenaal biss die Schnur durch.',
+    'ui.dive.card.causeTension': 'Zu viel Spannung auf der Schnur.',
+    'ui.dive.card.baitLost': '{count}× {name}',
+    'ui.dive.card.nothing': 'An der Schnur hing nichts.',
+    'ui.dive.card.stored': 'In der Hütte {count} / {cap}',
+    'ui.dive.card.sold': { one: '{n} verkauft für {money}', other: '{n} verkauft für {money}' },
+    'ui.dive.card.soldFull': { one: 'Hütte ist voll · {n} verkauft für {money}', other: 'Hütte ist voll · {n} verkauft für {money}' },
+    'ui.dive.card.tryElse': 'Probier andere Tiefe, Zeit oder Köder.',
+    // Zahl vorn: „Bonus für 12 Fische: …" passte schon bei +4 € nicht in eine Zeile (157 px)
+    'ui.dive.card.haul': { one: '{n} Fisch: Bonus +{pct} → +{money}', other: '{n} Fische: Bonus +{pct} → +{money}' },
+    'ui.dive.card.baitRanOut': '{from} alle → jetzt {to}.',   // Namen enthalten schon „Köder“ (Leuchtköder)
+    'ui.dive.card.rewardGold': { one: '+{n} Goldköder', other: '+{n} Goldköder' },
+    'ui.dive.card.moreBadges': '… und weitere: {count}',
+    // Abzeichen der Karte: Etikett (klein auf Farbe) + Text dahinter; Text hat 156 − Etikett − 7 px pro Zeile,
+    // ein längerer bricht auf eine 2. Zeile um (erst die 2. Zeile wird mit „…“ gekürzt)
+    'ui.dive.badge.quest': 'AUFTRAG',
+    'ui.dive.badge.legend': 'LEGENDE',
+    'ui.dive.badge.newSpecies': 'NEUE ART',
+    'ui.dive.badge.record': 'REKORD',
+    'ui.dive.badge.contest': 'TURNIER',
+    'ui.dive.badge.contestWon': 'Sieg! {name} {kg} · +{money}',
+    'ui.dive.badge.contestProgress': 'bisher {best} / Ziel {target}',
+    'ui.dive.badge.prize': 'GEWINN',
+    'ui.dive.badge.prizeText': '+{money} aufs Konto',
+    'ui.dive.badge.shark': 'HAI',
+    'ui.dive.badge.sharkText': 'fraß: {list}',
+    'ui.dive.badge.knot': 'KNOTEN',
+    'ui.dive.badge.knotText': 'verloren: {list}',
+    'ui.dive.badge.day': 'NEUER TAG',
+    'ui.dive.badge.dayText': 'der Markt hat sich bewegt',
+    'ui.dive.badge.dayIncome': 'neue Preise · Aquarium +{money}',
+    // Seitenleiste an der Oberfläche: Tour
+    'ui.dive.trip.title': 'TOUR',
+    'ui.dive.trip.dives': 'Tauchgänge',
+    'ui.dive.trip.fish': 'Gefangene Fische',
+    'ui.dive.trip.value': 'Wert',
+    'ui.dive.trip.snaps': 'Risse',
+    'ui.dive.trip.timeStops': 'Solange du an der Oberfläche bist, steht die Zeit still.',
+  });
+})(globalThis.HL);
